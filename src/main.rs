@@ -114,7 +114,7 @@ pub fn create_swapchain(device: Arc<Device>, surface: &Arc<Surface>, window: &Ar
 mod cs {
     vulkano_shaders::shader! {
         ty: "compute",
-        path: "src/mbrot.glsl",
+        path: "src/fractal.glsl",
     }
 }
 
@@ -470,7 +470,7 @@ fn main() {
 
                 /* Mandelbrot */
                 
-                let parameters = cs::Parameters {
+                let _parameters = cs::Parameters {
                     center: [-0.7451544, 0.1853],
                     time: 0.0,
                     scale: zoom as f64, 
