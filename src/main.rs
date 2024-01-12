@@ -114,7 +114,7 @@ pub fn create_swapchain(device: Arc<Device>, surface: &Arc<Surface>, window: &Ar
 mod cs {
     vulkano_shaders::shader! {
         ty: "compute",
-        path: "src/fractal.glsl",
+        path: "src/mbrot.glsl",
     }
 }
 
@@ -179,7 +179,7 @@ pub fn select_device(instance: Arc<Instance>, mut device_extensions: DeviceExten
                     // We select a queue family that supports graphics operations. When drawing to
                     // a window surface, as we do in this example, we also need to check that
                     // queues in this queue family are capable of presenting images to the surface.
-                    q.queue_flags.intersects(QueueFlags::GRAPHICS)
+                    q.queue_flags.intersects(QueueFlags::COMPUTE)
                         && p.surface_support(i as u32, &surface).unwrap_or(false)
                 })
                 // The code here searches for the first queue family that is suitable. If none is
@@ -458,6 +458,7 @@ fn main() {
                 /* Create a storage buffer (What are push constants, should we use those instead? ) */
 
                 /* Julia Set: */
+                
                 let parameters = cs::Parameters {
                     center: [0.0, 0.0], //[-0.7451544, 0.1853],
                     time: 0.0,
@@ -468,14 +469,15 @@ fn main() {
                 };
 
                 /* Mandelbrot */
-                /*
+                
                 let parameters = cs::Parameters {
                     center: [-0.7451544, 0.1853],
                     time: 0.0,
                     scale: zoom as f64, 
+                    mouse_pos: [0.0, 0.0],
                     iterations: iterations as i32, 
                     // ((iterations % 10000) / 100 ) as i32,
-                };  */
+                };  
 
                 // TODO: Reuuse buffer, or make it a staging buffer
                 let parameters_buffer = Buffer::from_data(
@@ -533,6 +535,7 @@ fn main() {
                 )
                 .unwrap();
                 
+                // TODO: Make this use a compute queue, not a graphics queue. 
                 builder
                     .bind_pipeline_compute(compute_pipeline.clone())
                     .unwrap()
@@ -543,7 +546,7 @@ fn main() {
                         set,
                     )
                     .unwrap()
-                    .dispatch([1024 / 8, 1024 / 8, 1])
+                    .dispatch([1024 / 16, 1024 / 16, 1])
                     .unwrap()
                     .blit_image(
                         BlitImageInfo::images(fractal_image.clone(), swapchain_images[image_index as usize].clone())
