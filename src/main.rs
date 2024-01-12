@@ -113,7 +113,7 @@ pub fn create_swapchain(device: Arc<Device>, surface: &Arc<Surface>, window: &Ar
 mod cs {
     vulkano_shaders::shader! {
         ty: "compute",
-        path: "src/fractal.glsl",
+        path: "src/mbrot.glsl",
     }
 }
 
@@ -425,12 +425,12 @@ fn main() {
                 let zoomtime = 70.0;
 
                 let mut time: f64 = SystemTime::now().duration_since(start)
-                    .unwrap().as_secs_f64() / 16.0;
+                    .unwrap().as_secs_f64() / 20.0;
                 
                 
                 //let scale = 1.0 / ((((time as f64 * (time as f64 * 0.001)) as i128 % 1000000000) / 10000 )) as f32;
 
-                let mut zoom = 0.4 + 0.38 * (1.6 * time.cos());
+                let mut zoom = 0.7 + 0.38 * (1.2 * time.cos());
 
                 let iterations = 100 + ((12.0 / zoom.powi(2)) as u32) % 800;
 
