@@ -9,6 +9,7 @@ edition = "2021"
 vulkano = "0.34"
 vulkano-shaders = "0.34"
 winit = "0.28"
+nalgebra-glm = "0.18"
 
 rand = "0.8"
 image = "0.24.0"
