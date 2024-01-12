@@ -28,6 +28,7 @@ use vulkano::pipeline::{
 };
 use vulkano::swapchain::{Surface, Swapchain, SwapchainCreateInfo, PresentMode, SwapchainPresentInfo, acquire_next_image};
 use vulkano::sync::{self, GpuFuture};
+use winit::dpi::PhysicalPosition;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{EventLoop, ControlFlow};
 use winit::window::{WindowBuilder, Window};
@@ -113,7 +114,7 @@ pub fn create_swapchain(device: Arc<Device>, surface: &Arc<Surface>, window: &Ar
 mod cs {
     vulkano_shaders::shader! {
         ty: "compute",
-        path: "src/mbrot.glsl",
+        path: "src/fractal.glsl",
     }
 }
 
@@ -342,11 +343,11 @@ fn main() {
 
     let mut iterations = 0; // Does this work in a loop?
     let start = SystemTime::now();
+
+    let mut mouse_pos: PhysicalPosition<f64> = PhysicalPosition::default();
+    
     /* How do i make a counter of this event loop?  */
     event_loop.run(move |event, _, control_flow| {
-        
-        iterations += 1;
-
         match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
@@ -360,7 +361,14 @@ fn main() {
             } => {
                 recreate_swapchain = true;
             }
+            Event::WindowEvent {
+                event: WindowEvent::CursorMoved { device_id, position, modifiers },
+                ..
+            } => {
+                mouse_pos = position;
+            }
             Event::RedrawEventsCleared => {
+                
                 // Do not draw the frame when the screen size is zero. On Windows, this can
                 // occur when minimizing the application.
                 let image_extent: [u32; 2] = window.inner_size().into();
@@ -437,9 +445,37 @@ fn main() {
                 zoom = zoom.powi(8);
 
                 
+                let mut x_pos = mouse_pos.x as f32 / window.inner_size().width as f32;
+                let mut y_pos = mouse_pos.y as f32 / window.inner_size().height as f32;
+
+                x_pos = x_pos - 0.5;
+                y_pos = y_pos - 0.5;
+
+                //println!("x: {}, y: {}", mouse_pos.x, mouse_pos.y);
+
 
                 /* Parameters Buffer */
                 /* Create a storage buffer (What are push constants, should we use those instead? ) */
+
+                /* Julia Set: */
+                let parameters = cs::Parameters {
+                    center: [0.0, 0.0], //[-0.7451544, 0.1853],
+                    time: 0.0,
+                    scale: 2.0, // zoom as f64, // time * 100.0,
+                    mouse_pos: [x_pos, y_pos],
+                    iterations: iterations as i32, 
+                    // ((iterations % 10000) / 100 ) as i32,
+                };
+
+                /* Mandelbrot */
+                /*
+                let parameters = cs::Parameters {
+                    center: [-0.7451544, 0.1853],
+                    time: 0.0,
+                    scale: zoom as f64, 
+                    iterations: iterations as i32, 
+                    // ((iterations % 10000) / 100 ) as i32,
+                };  */
 
                 // TODO: Reuuse buffer, or make it a staging buffer
                 let parameters_buffer = Buffer::from_data(
@@ -454,13 +490,7 @@ fn main() {
                         MemoryTypeFilter::HOST_RANDOM_ACCESS,
                         ..Default::default()
                     },
-                    cs::Parameters {
-                        center: [-0.7451544, 0.1853], //[-0.7451544, 0.1853],
-                        time: 0.0,
-                        scale: zoom as f64, // time * 100.0,
-                        iterations: iterations as i32, 
-                        // ((iterations % 10000) / 100 ) as i32,
-                    }
+                    parameters
                 )
                 .expect("failed to create buffer");
 
