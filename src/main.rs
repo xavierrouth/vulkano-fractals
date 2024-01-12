@@ -437,7 +437,6 @@ fn main() {
                 zoom = zoom.powi(8);
 
                 
-                println!("{iterations}");
 
                 /* Parameters Buffer */
                 /* Create a storage buffer (What are push constants, should we use those instead? ) */

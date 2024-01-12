@@ -61,7 +61,13 @@ void main() {
 
     float hue = float(i) / float(maxIterations); // double(tempDist);
 
-    vec3 hsv = vec3(hue, 1.0, 1.0);
+    float value = 1.0;
+
+    if (maxIterations == i) {
+        value = 0.0;
+    }
+
+    vec3 hsv = vec3(hue, 1.0, value);
     vec3 rgb = hsv2rgb(hsv);
 
     vec4 to_write = vec4(rgb, 1.0);

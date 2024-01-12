@@ -7,12 +7,21 @@ struct Parameters {
     int iterations;
 };
 
+// DO THIS EVENTUALLY: https://math.berkeley.edu/~kmill/toys/julia/julia.html#-0.7544974864573919,0.08640211655539655
+
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 layout(set = 0, binding = 0, rgba8) uniform writeonly image2D img;
 
 layout(std140, binding = 1) readonly buffer ParametersIn {
     Parameters p;
 };
+
+vec3 hsv2rgb(vec3 c)
+{
+    const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 void main() {
     // Coordinates scaled to the image size
@@ -26,12 +35,9 @@ void main() {
     double minDist = 1e20;
     double tempDist = 1e20;
     
-    // How do we cast form float to double in glsl? 
-    
+    dvec2 c = dvec2(0.0, 0.0);
 
-    dvec2 c = (norm_coordinates - dvec2(0.5)) * scale + center;
-
-    dvec2 z = dvec2(0.0, 0.0);
+    dvec2 z = (norm_coordinates - dvec2(0.5)) * scale + center;
 
     const int maxIterations = p.iterations;
 
@@ -52,8 +58,16 @@ void main() {
         }
     }
 
-    double result = double(tempDist);
-    vec4 to_write = vec4(1 - result, result, result, 1.0);
+    float hue = float(i) / float(maxIterations); // double(tempDist);
+
+    if (maxIterations == i ) {
+        hue = 0.0
+    }
+
+    vec3 hsv = vec3(hue, 1.0, 1.0);
+    vec3 rgb = hsv2rgb(hsv);
+
+    vec4 to_write = vec4(rgb, 1.0);
 
     imageStore(img, ivec2(gl_GlobalInvocationID.xy), to_write);
 }
