@@ -445,8 +445,8 @@ fn main() {
                 zoom = zoom.powi(8);
 
                 
-                let mut x_pos = mouse_pos.x as f32 / window.inner_size().width as f32;
-                let mut y_pos = mouse_pos.y as f32 / window.inner_size().height as f32;
+                let mut x_pos = mouse_pos.x as f64 / window.inner_size().width as f64;
+                let mut y_pos = mouse_pos.y as f64 / window.inner_size().height as f64;
 
                 x_pos = x_pos - 0.5;
                 y_pos = y_pos - 0.5;
@@ -462,8 +462,8 @@ fn main() {
                     center: [0.0, 0.0], //[-0.7451544, 0.1853],
                     time: 0.0,
                     scale: 2.0, // zoom as f64, // time * 100.0,
-                    mouse_pos: [x_pos, y_pos],
-                    iterations: iterations as i32, 
+                    mouse_pos: [-1.0 * x_pos, y_pos],
+                    iterations: 200 as i32, 
                     // ((iterations % 10000) / 100 ) as i32,
                 };
 

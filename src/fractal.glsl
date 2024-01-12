@@ -4,7 +4,7 @@ struct Parameters {
     dvec2 center;
     double time; 
     double scale;
-    vec2 mouse_pos;
+    dvec2 mouse_pos;
     int iterations;
 };
 
@@ -15,10 +15,10 @@ layout(std140, binding = 1) readonly buffer ParametersIn {
     Parameters p;
 };
 
-vec3 hsv2rgb(vec3 c)
+dvec3 hsv2rgb(dvec3 c)
 {
-    const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    const dvec4 K = dvec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    dvec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
@@ -60,16 +60,18 @@ void main() {
         }
     }
 
-    float hue = float(i) / float(maxIterations); // double(tempDist);
+    double hue = double(i) / double(maxIterations); // double(tempDist);
 
-    float value = 1.0;
+    //hue = float(minDist);
+    
+    double value = 1 - double(minDist);
 
     if (maxIterations == i) {
         value = 0.0;
     }
 
-    vec3 hsv = vec3(hue, 1.0, value);
-    vec3 rgb = hsv2rgb(hsv);
+    dvec3 hsv = vec3(hue, 1.0, value);
+    dvec3 rgb = hsv2rgb(hsv);
 
     vec4 to_write = vec4(rgb, 1.0);
 
