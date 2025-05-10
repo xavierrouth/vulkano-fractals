@@ -144,7 +144,13 @@ pub fn create_compute_pipeline(device: Arc<Device>) -> Arc<ComputePipeline> {
     compute_pipeline
 }
 
-pub fn select_device(instance: Arc<Instance>, mut device_extensions: DeviceExtensions, surface: &Arc<Surface>) -> (Arc<Device>, Arc<Queue>) {
+pub fn select_device(
+    instance: Arc<Instance>, 
+    mut device_extensions: DeviceExtensions, 
+    surface: &Arc<Surface>
+) 
+    -> (Arc<Device>, Arc<Queue>) 
+    {
     let (physical_device, queue_family_index) = instance
         .enumerate_physical_devices()
         .unwrap()
@@ -340,13 +346,10 @@ fn main() {
     // Destroying the `GpuFuture` blocks until the GPU is finished executing it. In order to avoid
     // that, we store the submission of the previous frame here.
     let mut previous_frame_end = Some(sync::now(device.clone()).boxed());
-
-    let mut iterations = 0; // Does this work in a loop?
     let start = SystemTime::now();
 
     let mut mouse_pos: PhysicalPosition<f64> = PhysicalPosition::default();
     
-    /* How do i make a counter of this event loop?  */
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::WindowEvent {
@@ -448,8 +451,8 @@ fn main() {
                 let mut x_pos = mouse_pos.x as f64 / window.inner_size().width as f64;
                 let mut y_pos = mouse_pos.y as f64 / window.inner_size().height as f64;
 
-                x_pos = x_pos - 0.5;
-                y_pos = y_pos - 0.5;
+                x_pos = (x_pos - 0.5) * 3.0;
+                y_pos = (y_pos - 0.5) * 3.0;
 
                 //println!("x: {}, y: {}", mouse_pos.x, mouse_pos.y);
 
@@ -458,16 +461,19 @@ fn main() {
                 /* Create a storage buffer (What are push constants, should we use those instead? ) */
 
                 /* Julia Set: */
-                
+                x_pos = -0.162;
+                y_pos = -1.04;
+
                 let parameters = cs::Parameters {
                     center: [0.0, 0.0], //[-0.7451544, 0.1853],
                     time: 0.0,
-                    scale: 2.0, // zoom as f64, // time * 100.0,
-                    mouse_pos: [-1.0 * x_pos, y_pos],
-                    iterations: 200 as i32, 
+                    scale: 0.5, // zoom as f64, // time * 100.0,
+                    mouse_pos: [x_pos, y_pos],
+                    iterations: 300 as i32, 
                     // ((iterations % 10000) / 100 ) as i32,
                 };
 
+                //println!("xpos: {x_pos} ypos:{y_pos}");
                 /* Mandelbrot */
                 
                 let _parameters = cs::Parameters {
